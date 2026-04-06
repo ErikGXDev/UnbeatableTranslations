@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>UnbeatableTranslations</AssemblyName>
+        <Product>Custom Translations</Product>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json;
+            https://nuget.samboy.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <RootNamespace>UnbeatableTranslations</RootNamespace>
+
+        <GamePath>Q:\Programme\Steam\steamapps\common\UNBEATABLE</GamePath>
+        <ManagedPath>$(GamePath)\UNBEATABLE_Data\Managed\</ManagedPath>
+
+        <PluginFolder>$(AssemblyName)</PluginFolder>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+    </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Reference Include="UnityEngine">
+            <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputModule">
+            <HintPath>$(ManagedPath)\UnityEngine.InputModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(ManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(ManagedPath)\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="Google.Protobuf">
+            <HintPath>$(ManagedPath)\Google.Protobuf.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.LocalizationModule">
+            <HintPath>$(ManagedPath)\UnityEngine.LocalizationModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.Localization">
+            <HintPath>$(ManagedPath)\Unity.Localization.dll</HintPath>
+        </Reference>
+        <Reference Include="YarnSpinner.Compiler">
+            <HintPath>$(ManagedPath)\YarnSpinner.Compiler.dll</HintPath>
+        </Reference>
+        <Reference Include="YarnSpinner">
+            <HintPath>$(ManagedPath)\YarnSpinner.dll</HintPath>
+        </Reference>
+        <Reference Include="YarnSpinner.Unity">
+            <HintPath>$(ManagedPath)\YarnSpinner.Unity.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(GamePath)\BepInEx\plugins\UnbeatableTranslations&quot;"/>
+
+    </Target>
+</Project>
