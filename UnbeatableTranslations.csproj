@@ -39,6 +39,16 @@
         <Reference Include="UnityEngine.CoreModule">
             <HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.UIElementsModule">
+            <HintPath>$(ManagedPath)\UnityEngine.UIElementsModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(ManagedPath)\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(ManagedPath)\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        
         <Reference Include="UnityEngine.InputModule">
             <HintPath>$(ManagedPath)\UnityEngine.InputModule.dll</HintPath>
         </Reference>
