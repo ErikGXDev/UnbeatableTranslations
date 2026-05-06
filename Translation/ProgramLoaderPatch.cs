@@ -53,7 +53,7 @@ namespace UnbeatableTranslations.Translation
         
         // TODO: Somehow make this work, maybe await translations update for the game?
 
-        // Patch 1: StringTableEntry.GetLocalizedString()
+        /*// Patch 1: StringTableEntry.GetLocalizedString()
         [HarmonyPatch(typeof(StringTableEntry), "GetLocalizedString", new Type[] { })]
         [HarmonyPrefix]
         public static bool StringTableEntryPatch(StringTableEntry __instance, ref string __result)
@@ -163,6 +163,7 @@ namespace UnbeatableTranslations.Translation
 
             return true;
         }
+        */
 
 
     }

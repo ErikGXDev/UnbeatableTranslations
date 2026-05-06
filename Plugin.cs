@@ -3,7 +3,7 @@ using BepInEx;
 using BepInEx.Logging;
 using UnbeatableTranslations.Translation;
 using UnityEngine;
-using UnityEngine.Windows;
+using UnityEngine.SceneManagement;
 using Input = UnityEngine.Input;
 
 namespace UnbeatableTranslations;
@@ -15,63 +15,68 @@ public class Plugin : BaseUnityPlugin
 
     private void Awake()
     {
-        // Plugin startup logic
         Logger = base.Logger;
-        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
-        
-        Type[] patchClasses =
-        {
-            typeof(ProgramLoaderPatch)
-        };
-        
+        Logger.LogInfo($"");
+        Logger.LogInfo("--- Translation Mod Loaded ---");
+        Logger.LogInfo($"");
+        Logger.LogInfo($"Find Source Code + Documentation here:");
+        Logger.LogInfo($"https://github.com/ErikGXDev/UnbeatableTranslations");
+        Logger.LogInfo($"");
+        Logger.LogInfo("--- Shortcuts ---");
+        Logger.LogInfo("Ctrl + Shift + 1: Toggle translations on/off");
+        Logger.LogInfo("Ctrl + Shift + 2: Reload translations");
+        Logger.LogInfo("Ctrl + Shift + 3: Dump translations from the game to the disk");
+        Logger.LogInfo("Ctrl + Shift + 4: Reload the current scene");
+        Logger.LogInfo("");
+        Logger.LogInfo("Check link above for more instructions.");
+        Logger.LogInfo("--- --- ---");
+        Logger.LogInfo($"");
+
+
         var harmony = new HarmonyLib.Harmony(MyPluginInfo.PLUGIN_GUID);
-        foreach (var patchClass in patchClasses)
-        {
-            harmony.PatchAll(patchClass);
-        }
-        
+        harmony.PatchAll(typeof(ProgramLoaderPatch));
+
         ProgramLoader.LoadLocalTranslations();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneTranslationApplier.RequestApply(this);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneTranslationApplier.RequestApply(this);
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     public void Update()
     {
-        // CTRL + Shift + 3 to dump translations
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha3))
         {
             Logger.LogInfo("Dumping translations...");
             Dump.DumpTranslations();
         }
-        
-        // CTRL + Shift + 1 to enable/disable translations
+
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha1))
         {
             ProgramLoader.disableCustomTranslation = !ProgramLoader.disableCustomTranslation;
-            
-            if (ProgramLoader.disableCustomTranslation)
-            {
-                Logger.LogInfo("Translations disabled!");
-            }
-            else
-            {
-                Logger.LogInfo("Translations enabled!");
-            }
+            Logger.LogInfo(ProgramLoader.disableCustomTranslation ? "Translations disabled!" : "Translations enabled!");
         }
-        
-        // CTRL + Shift + 2 to reload translations
+
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha2))
         {
             ProgramLoader.LoadLocalTranslations();
-            
+            SceneTranslationApplier.RequestApply(this);
             Logger.LogInfo("Translations reloaded!");
         }
-        
-        // CTRL + Shift + 4 reload scene
+
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha4))
         {
             Logger.LogInfo("Reloading scene...");
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-            ); }
-        
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
     }
 }
