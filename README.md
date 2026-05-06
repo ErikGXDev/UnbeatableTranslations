@@ -24,7 +24,7 @@ CTRL + Shift + 4 - reload scene
 
 Check the BepInEx console for more output when using these shortcuts.
 
-Translations will be dumped into a `translations_dumped` folder in the game folder.
+Translations will be dumped into a `translations_dumped` folder in the game folder. The game will load translations from a `Translation` folder that you will have to create inside the game directory. **Please do not edit the translations inside the dumped folder, to avoid overwriting your work accidentally.**
 
 
 ## Notes
