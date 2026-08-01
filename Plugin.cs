@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
 using UnbeatableTranslations.Translation;
@@ -38,12 +40,33 @@ public class Plugin : BaseUnityPlugin
 
         ProgramLoader.LoadLocalTranslations();
         SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneTranslationApplier.RequestApply(this);
+        SceneTranslationApplier.RequestApplyScene(this, 2);
+        
+        // Disable Loop for now
+        //StartCoroutine(ApplyTranslationsLoop());
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        SceneTranslationApplier.RequestApply(this);
+        Logger.LogInfo("Scene switched to " + scene.name);
+        
+        SceneTranslationApplier.RequestApplyScene(this, 2);
+
+    }
+
+    private IEnumerator ApplyTranslationsLoop()
+    {
+        while (true)
+        {
+            if (!ProgramLoader.disableCustomTranslation)
+            {
+                Logger.LogInfo("[Translation Loop] Applying translations to scene...");
+                SceneTranslationApplier.RequestApplyScene(this, 1);
+            }
+
+            yield return new WaitForSeconds(5f);
+
+        }
     }
 
     private void OnDestroy()
@@ -68,7 +91,7 @@ public class Plugin : BaseUnityPlugin
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha2))
         {
             ProgramLoader.LoadLocalTranslations();
-            SceneTranslationApplier.RequestApply(this);
+            SceneTranslationApplier.RequestApplyScene(this, 2);
             Logger.LogInfo("Translations reloaded!");
         }
 
