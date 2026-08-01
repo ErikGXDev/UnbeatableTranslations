@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -141,6 +142,11 @@ public static class SceneTranslationApplier
         var textMeshProUGUI = gameObject.GetComponent<TextMeshProUGUI>();
         if (textMeshProUGUI != null)
         {
+            if (textMeshProUGUI.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
+            
             textMeshProUGUI.SetText(translatedText);
             return true;
         }
@@ -148,6 +154,10 @@ public static class SceneTranslationApplier
         var textMeshPro = gameObject.GetComponent<TextMeshPro>();
         if (textMeshPro != null)
         {
+            if (textMeshPro.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
             textMeshPro.SetText(translatedText);
             return true;
         }
@@ -155,6 +165,11 @@ public static class SceneTranslationApplier
         var unityText = gameObject.GetComponent<Text>();
         if (unityText != null)
         {
+            if (unityText.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
+            
             unityText.text = translatedText;
             return true;
         }
@@ -167,6 +182,11 @@ public static class SceneTranslationApplier
         var textMeshProUGUI = gameObject.GetComponentInChildren<TextMeshProUGUI>();
         if (textMeshProUGUI != null)
         {
+            if (textMeshProUGUI.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
+            
             textMeshProUGUI.SetText(translatedText);
             return true;
         }
@@ -174,6 +194,11 @@ public static class SceneTranslationApplier
         var textMeshPro = gameObject.GetComponentInChildren<TextMeshPro>();
         if (textMeshPro != null)
         {
+            if (textMeshPro.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
+            
             textMeshPro.SetText(translatedText);
             return true;
         }
@@ -181,6 +206,10 @@ public static class SceneTranslationApplier
         var unityText = gameObject.GetComponentInChildren<Text>();
         if (unityText != null)
         {
+            if (unityText.text == translatedText)
+            {
+                return true; // No need to set the same text again
+            }
             unityText.text = translatedText;
             return true;
         }
