@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.PropertyVariants;
+using UnityEngine.Localization.PropertyVariants.TrackedObjects;
 using UnityEngine.Localization.PropertyVariants.TrackedProperties;
 using UnityEngine.UI;
 
@@ -12,26 +13,51 @@ namespace UnbeatableTranslations.Translation;
 
 public static class SceneTranslationApplier
 {
-    private const int MaxAttempts = 5;
-
-    public static void RequestApply(MonoBehaviour host)
+    public static void RequestApplyScene(MonoBehaviour host, int tries = 5)
     {
-        if (host != null)
+        if (host)
         {
-            host.StartCoroutine(ApplyWhenReady());
+            host.StartCoroutine(ApplySceneWhenReady(tries));
+        }
+    }
+    
+    public static void RequestApplyLocalizer(GameObjectLocalizer localizer, int tries = 5)
+    {
+        if (localizer)
+        {
+            localizer.StartCoroutine(ApplyLocalizerWhenReady(localizer, tries));
         }
     }
 
-    private static IEnumerator ApplyWhenReady()
+    private static IEnumerator ApplySceneWhenReady(int tries)
     {
-        for (int attempt = 0; attempt < MaxAttempts; attempt++)
+        for (int attempt = 0; attempt < tries; attempt++)
         {
             yield return null;
 
-            if (ApplyToScene() > 0)
+            ApplyToScene();
+            
+            yield return new WaitForSeconds(0.2f);
+
+        }
+
+    }
+    
+    private static IEnumerator ApplyLocalizerWhenReady(GameObjectLocalizer localizer, int tries)
+    {
+        for (int attempt = 0; attempt < tries; attempt++)
+        {
+            yield return null;
+
+            if (!localizer || !localizer.gameObject)
             {
                 yield break;
             }
+
+            ApplyToLocalizer(localizer);
+            
+            yield return new WaitForSeconds(0.2f);
+
         }
     }
 
@@ -107,7 +133,7 @@ public static class SceneTranslationApplier
                         continue;
                     }
 
-                    if (TryApplyTranslation(localizer.gameObject, translatedValue))
+                    if (TryApplyTranslation(trackedObject, translatedValue))
                     {
                         appliedCount++;
                     }
@@ -122,7 +148,44 @@ public static class SceneTranslationApplier
         return appliedCount;
     }
 
-    private static bool TryApplyTranslation(GameObject gameObject, string translatedText)
+    private static bool TryApplyTranslation(TrackedObject trackedObject, string translatedText)
+    {
+        if (trackedObject == null || trackedObject.Target == null)
+        {
+            return false;
+        }
+
+        if (trackedObject.Target is TMP_Text tmpText)
+        {
+            if (tmpText.text == translatedText)
+            {
+                return true;
+            }
+
+            tmpText.SetText(translatedText);
+            return true;
+        }
+        
+        if (trackedObject.Target is Text unityText)
+        {
+            if (unityText.text == translatedText)
+            {
+                return true;
+            }
+
+            unityText.text = translatedText;
+            return true;
+        }
+        
+        if (trackedObject.Target is GameObject gameObject)
+        {
+            return TryApplyTranslationO(gameObject, translatedText);
+        }
+        
+        return false;
+    }
+
+    private static bool TryApplyTranslationO(GameObject gameObject, string translatedText)
     {
         if (gameObject == null)
         {
@@ -144,7 +207,7 @@ public static class SceneTranslationApplier
         {
             if (textMeshProUGUI.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             
             textMeshProUGUI.SetText(translatedText);
@@ -156,7 +219,7 @@ public static class SceneTranslationApplier
         {
             if (textMeshPro.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             textMeshPro.SetText(translatedText);
             return true;
@@ -167,7 +230,7 @@ public static class SceneTranslationApplier
         {
             if (unityText.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             
             unityText.text = translatedText;
@@ -184,7 +247,7 @@ public static class SceneTranslationApplier
         {
             if (textMeshProUGUI.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             
             textMeshProUGUI.SetText(translatedText);
@@ -196,7 +259,7 @@ public static class SceneTranslationApplier
         {
             if (textMeshPro.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             
             textMeshPro.SetText(translatedText);
@@ -208,7 +271,7 @@ public static class SceneTranslationApplier
         {
             if (unityText.text == translatedText)
             {
-                return true; // No need to set the same text again
+                return true;
             }
             unityText.text = translatedText;
             return true;

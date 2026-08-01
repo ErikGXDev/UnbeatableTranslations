@@ -1,6 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 using UnityEngine.Localization;
+using UnityEngine.Localization.PropertyVariants;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using static UnbeatableTranslations.Translation.ProgramLoader;
@@ -9,6 +10,60 @@ namespace UnbeatableTranslations.Translation
 {
     public static class ProgramLoaderPatch
     {
+        
+        // Question: Would a MonoBehaviour OnEnable patch be too much?
+        [HarmonyPatch(typeof(GameObjectLocalizer), "OnEnable")]
+        [HarmonyPostfix]
+        public static void GameObjectLocalizerEnable(GameObjectLocalizer __instance)
+        {
+            SceneTranslationApplier.RequestApplyLocalizer(__instance);
+        }
+        
+        // Larger patch for string generation
+        private sealed class LocalizedValueState
+        {
+            public StringTableEntry Entry;
+            public string OriginalValue;
+        }
+        
+        [HarmonyPatch(typeof(LocalizedStringDatabase), "GenerateLocalizedString")]
+        [HarmonyPrefix]
+        private static void GenerateLocalizedStringPrefix(StringTable table, StringTableEntry entry, out LocalizedValueState __state)
+        {
+            __state = null;
+
+            if (disableCustomTranslation || table == null || entry == null || ProgramIndex.unityTable == null)
+            {
+                return;
+            }
+
+            if (!ProgramIndex.unityTable.TryGetEntry("en", table.TableCollectionName, entry.Key, out var translatedValue))
+            {
+                return;
+            }
+
+            __state = new LocalizedValueState
+            {
+                Entry = entry,
+                OriginalValue = entry.Value
+            };
+
+            entry.Value = translatedValue;
+        }
+        
+        // Potential race condition?
+        [HarmonyPatch(typeof(LocalizedStringDatabase), "GenerateLocalizedString")]
+        [HarmonyPostfix]
+        private static void GenerateLocalizedStringPostfix(LocalizedValueState __state)
+        {
+            if (__state?.Entry != null)
+            {
+                __state.Entry.Value = __state.OriginalValue;
+            }
+        }
+        
+        
+        // For story dialogue
         [HarmonyPatch(typeof(Yarn.Unity.YarnProject), "GetProgram")]
         [HarmonyPrefix]
         public static bool GetCustomProgram(Yarn.Unity.YarnProject __instance, ref Yarn.Program __result)
@@ -27,7 +82,7 @@ namespace UnbeatableTranslations.Translation
             return true;
         }
 
-
+        // Story lines
         [HarmonyPatch(typeof(Yarn.Unity.Localization), "GetLocalizedString")]
         [HarmonyPrefix]
         public static bool GetCustomLocalizedString(Yarn.Unity.Localization __instance, string key, ref string __result)
@@ -50,10 +105,9 @@ namespace UnbeatableTranslations.Translation
             return true;
 
         }
-        
-        // TODO: Somehow make this work, maybe await translations update for the game?
 
-        /*// Patch 1: StringTableEntry.GetLocalizedString()
+        
+        // Patch 1: StringTableEntry.GetLocalizedString()
         [HarmonyPatch(typeof(StringTableEntry), "GetLocalizedString", new Type[] { })]
         [HarmonyPrefix]
         public static bool StringTableEntryPatch(StringTableEntry __instance, ref string __result)
@@ -140,7 +194,7 @@ namespace UnbeatableTranslations.Translation
             var tableName = tableReference.TableCollectionName;
             var key = tableEntryReference.Key;
             
-            try
+            /*try
             {
                 string dLocaleCode = "en";
                 string dTableName = tableReference.TableCollectionName;
@@ -150,7 +204,7 @@ namespace UnbeatableTranslations.Translation
             catch (Exception ex)
             {
                 Plugin.Logger.LogError($"Error in LocalizedDatabase patch: {ex.Message}");
-            }
+            }*/
             
             if (ProgramIndex.unityTable.TryGetEntry(localeCode, tableName, key, out string value))
             {
@@ -163,7 +217,6 @@ namespace UnbeatableTranslations.Translation
 
             return true;
         }
-        */
 
 
     }
